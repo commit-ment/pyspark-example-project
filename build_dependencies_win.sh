@@ -33,7 +33,7 @@ then
     fi
 
     cd packages
-    zip -9mrv packages.zip .
+    zip a packages.zip .
     mv packages.zip ..
     cd ..
 
@@ -43,8 +43,8 @@ then
     
     # add local modules
     echo '... adding all modules from local utils package'
-    zip -ru9 packages.zip dependencies -x dependencies/__pycache__/\*
-    zip -ru9 packages.zip transformations -x transformations/__pycache__/\*
+    zip a packages.zip dependencies
+    zip a packages.zip transformations
 
     exit 0
 else
