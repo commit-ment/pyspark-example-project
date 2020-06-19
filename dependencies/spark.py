@@ -104,3 +104,22 @@ def start_spark(app_name='my_spark_app', master='local[*]', jar_packages=[],
         config_dict = None
 
     return spark_sess, spark_logger, config_dict
+
+
+def transform_data(df, transformations, log=None):
+    """Transform original dataset.
+
+    :param df: Input DataFrame.
+    :param transformations: Specified transformations dict from config file,
+        containing the chain of transformations to be aplied to df.
+    :param log: Logger to be passed downstream to transformation implementation.
+    :return: Transformed DataFrame.
+    """
+    df_transformed = df
+    for t in transformations:
+        if log:
+            log.warn(('Loading transformation: %s' % t))
+        _transformation = __import__(('transformations.%s' % t), globals(), locals(), ['process'], 0)
+        df_transformed = _transformation.process(df_transformed, params=transformations[t], log = log)
+
+    return df_transformed

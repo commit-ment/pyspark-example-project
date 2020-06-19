@@ -1,0 +1,16 @@
+{
+    "data_source":
+    {
+        "location":"tests/test_data/retail-data/*.csv",
+        "type":"csv"
+    },
+    "transformations":
+    {
+        "items_sold_per_country":[],
+        "items_sold_filter_country":{"value":"United Kingdom"}
+    },
+    "data_output":
+    {
+        "location":"loaded_data/retail-data"
+    }
+}

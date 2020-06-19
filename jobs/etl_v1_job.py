@@ -32,11 +32,11 @@ functions, such that the key Transform steps can be covered by tests
 and jobs or called from within another environment (e.g. a Jupyter or
 Zeppelin notebook).
 """
-
+import sys
 from pyspark.sql import Row
 from pyspark.sql.functions import col, concat_ws, lit
 
-from dependencies.spark import start_spark
+from dependencies.spark import start_spark, transform_data
 
 
 def main():
@@ -44,65 +44,53 @@ def main():
 
     :return: None
     """
+
+    job_name = sys.argv[1]
+
     # start Spark application and get Spark session, logger and config
     spark, log, config = start_spark(
-        app_name='my_etl_v1_job',
-        files=['configs/etl_v1_config.json'])
+        app_name=job_name)
 
     # log that main ETL job is starting
-    log.warn('etl_v1_job is up-and-running')
+    log.warn('%s is up-and-running' % job_name)
 
     # execute ETL pipeline
-    data = extract_data(spark)
+    data = extract_data(spark, config['data_source'])
 
     #dynamically load transformations from settings
-    for t in config['transformations']:
-        log.warn('Performing transformation %s' % t)
-        data = transform_data(data, config['transformations'], log)
-
+    data = transform_data(data, config['transformations'], log)
 
     #data_transformed = transform_data(data, config['steps_per_floor'])
-    load_data(data)
+    load_data(data, config['data_output'])
 
     # log the success and terminate Spark application
-    log.warn('etl_v1_job is finished')
+    log.warn('%s is finished' % job_name)
     spark.stop()
     return None
 
 
-def extract_data(spark):
+def extract_data(spark, source):
     """Load data from Parquet file format.
 
     :param spark: Spark session object.
     :return: Spark DataFrame.
     """
-    df = (
-        spark
-        .read
-        .parquet('tests/test_data/employees'))
-
-    return df
-
-
-def transform_data(df, transformations, log):
-    """Transform original dataset.
-
-    :param df: Input DataFrame.
-    :param transformations: Specified transformations dict from config file,
-        containing the chain of transformations to be aplied to df.
-    :param log: Logger to be passed downstream to transformation implementation.
-    :return: Transformed DataFrame.
-    """
-    df_transformed = df
-    for t in transformations:
-        log.info(('Loading transformation: %s' % t))
-        _transformation = __import__(('transformations.%s' % t), globals(), locals(), ['process'], 0)
-        df_transformed = _transformation.process(df_transformed, params=transformations[t], log = log)
-
-    return df_transformed
+    if 'csv' in source['type']:
+        df = spark.read.format("csv")\
+            .option("header", "true")\
+            .option("inferSchema", "true")\
+            .load(source['location'])\
+            .coalesce(2)
+        return df
+    if 'parquet' in source['type']:
+        df = (
+            spark.read.parquet(source['location']))
+        return df
+    
+    return None
 
 
-def load_data(df):
+def load_data(df, output):
     """Collect data locally and write to CSV.
 
     :param df: DataFrame to print.
@@ -111,47 +99,7 @@ def load_data(df):
     (df
      .coalesce(1)
      .write
-     .csv('loaded_data', mode='overwrite', header=True))
-    return None
-
-
-def create_test_data(spark, config):
-    """Create test data.
-
-    This function creates both both pre- and post- transformation data
-    saved as Parquet files in tests/test_data. This will be used for
-    unit tests as well as to load as part of the example ETL job.
-    :return: None
-    """
-    # create example data from scratch
-    local_records = [
-        Row(id=1, first_name='Dan', second_name='Germain', floor=1),
-        Row(id=2, first_name='Dan', second_name='Sommerville', floor=1),
-        Row(id=3, first_name='Alex', second_name='Ioannides', floor=2),
-        Row(id=4, first_name='Ken', second_name='Lai', floor=2),
-        Row(id=5, first_name='Stu', second_name='White', floor=3),
-        Row(id=6, first_name='Mark', second_name='Sweeting', floor=3),
-        Row(id=7, first_name='Phil', second_name='Bird', floor=4),
-        Row(id=8, first_name='Kim', second_name='Suter', floor=4)
-    ]
-
-    df = spark.createDataFrame(local_records)
-
-    # write to Parquet file format
-    (df
-     .coalesce(1)
-     .write
-     .parquet('tests/test_data/employees', mode='overwrite'))
-
-    # create transformed version of data
-    df_tf = transform_data(df, config['transformations'], None)
-
-    # write transformed version of data to Parquet
-    (df_tf
-     .coalesce(1)
-     .write
-     .parquet('tests/test_data/employees_report', mode='overwrite'))
-
+     .csv(output['location'], mode='overwrite', header=True))
     return None
 
 

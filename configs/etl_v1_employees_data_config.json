@@ -1,0 +1,16 @@
+{
+    "data_source":
+    {
+        "location":"tests/test_data/employees",
+        "type":"parquet"
+    },
+    "transformations":
+    {
+        "capitalise":[],
+        "steps":{"steps_per_floor":21}
+    },
+    "data_output":
+    {
+        "location":"loaded_data/employees-data"
+    }
+}

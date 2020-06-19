@@ -44,7 +44,11 @@ then
     # add local modules
     echo '... adding all modules from local utils package'
     zip a packages.zip dependencies
-    zip a packages.zip transformations
+
+
+    # add transformations zip
+    zip a transformations.zip transformations
+    #zip a packages.zip transformations
 
     exit 0
 else
