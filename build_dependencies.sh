@@ -44,7 +44,11 @@ then
     # add local modules
     echo '... adding all modules from local utils package'
     zip -ru9 packages.zip dependencies -x dependencies/__pycache__/\*
-    zip -ru9 packages.zip transformations -x transformations/__pycache__/\*
+    #zip -ru9 packages.zip transformations -x transformations/__pycache__/\*
+
+    # add transformations zip
+    zip -9mrv transformations.zip transformations
+    #zip a packages.zip transformations
 
     exit 0
 else
