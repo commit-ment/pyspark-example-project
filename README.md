@@ -66,7 +66,7 @@ Configuration section is the one with added complexity in order to facilitate th
 
 ```json
 
-“data_source”:
+"data_source":
 {
 	"location": "-location of the data",
 	"type": "parquet | csv | etc."
@@ -78,7 +78,7 @@ Data type loading implementation logic should be implemented in the custom job s
 ### Transformations
 
 ```json
-“transformations”:
+"transformations":
 {
     "transformation_name (script name)":
     {
