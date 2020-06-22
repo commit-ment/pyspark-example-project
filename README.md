@@ -68,8 +68,8 @@ Configuration section is the one with added complexity in order to facilitate th
 
 “data_source”:
 {
-	“location”: - location of the data,
-	“type”: “parquet | csv | etc.”
+	"location": "-location of the data",
+	"type": "parquet | csv | etc."
 }
 
 ```
@@ -80,13 +80,13 @@ Data type loading implementation logic should be implemented in the custom job s
 ```json
 “transformations”:
 {
-	“transformation_name (script name)”:
+    "transformation_name (script name)":
     {
-         -transformation related parameters in json format
-    }
-	“transformation_name (script name)”:
+         "-transformation related parameters in json format"
+    },
+	"transformation_name (script name)":
     {
-         -transformation related parameters in json format
+         "-transformation related parameters in json format"
     }
 }
 ```
@@ -94,9 +94,9 @@ Data type loading implementation logic should be implemented in the custom job s
 ### Data output
 
 ```json
-“data_output”:
+"data_output":
 {
-	“location”: - location of the output
+	"location": "-location of the output"
 }
 
 ```
